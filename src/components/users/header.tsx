@@ -13,6 +13,24 @@ export function Header() {
         </div>
         <div className="flex items-center gap-6">
           <a
+            href="/"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Sentiment Analysis
+          </a>
+          <a
+            href="/users"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Batch Analysis
+          </a>
+          <a
+            href="/cluster"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Clustering
+          </a>
+          <a
             href="#"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >

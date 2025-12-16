@@ -16,26 +16,38 @@ export default function AnalysisPage() {
   const [inputText, setInputText] = useState("")
   const [analysis, setAnalysis] = useState<SentimentResult | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleAnalyze = async () => {
     if (!inputText.trim()) return
 
     setIsAnalyzing(true)
-    // Simulate API call - replace with actual backend API
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    
-    // Mock sentiment analysis result
-    const mockResult: SentimentResult = {
-      sentiment: inputText.toLowerCase().includes("good") || inputText.toLowerCase().includes("great") 
-        ? "positive" 
-        : inputText.toLowerCase().includes("bad") || inputText.toLowerCase().includes("terrible")
-        ? "negative"
-        : "neutral",
-      confidence: Math.random() * 30 + 70, // Random confidence between 70-100%
-      keywords: ["quality", "service", "experience", "product"]
+    setError(null)
+    try {
+      const response = await fetch('http://127.0.0.1:8000/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inputs: [inputText] }),
+      })
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      const result = data.results[0]
+      const sentiment = result.sentiment === 'good' ? 'positive' : result.sentiment === 'bad' ? 'negative' : 'neutral'
+      const analysisResult: SentimentResult = {
+        sentiment,
+        confidence: result.confidence * 100,
+        keywords: ["quality", "service", "experience", "product"] // Mock keywords since API doesn't provide them
+      }
+      setAnalysis(analysisResult)
+    } catch (error) {
+      console.error('Error analyzing text:', error)
+      setError(error instanceof Error ? error.message : 'An unknown error occurred')
+      setAnalysis(null)
     }
-    
-    setAnalysis(mockResult)
     setIsAnalyzing(false)
   }
 
@@ -189,6 +201,17 @@ export default function AnalysisPage() {
                 </p>
               </div>
             </div>
+          </Card>
+        )}
+
+        {/* Error Area */}
+        {error && (
+          <Card className="border-red-500 bg-red-50 p-6">
+            <div className="flex items-center gap-2">
+              <div className="h-5 w-5 text-red-500">⚠️</div>
+              <h2 className="text-lg font-semibold text-red-700">Analysis Error</h2>
+            </div>
+            <p className="mt-2 text-red-600">{error}</p>
           </Card>
         )}
       </div>
